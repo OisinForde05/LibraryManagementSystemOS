@@ -12,6 +12,9 @@ public class Client {
             BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
 
+            output.println("Hello from client");
+            String response = input.readLine();
+            System.out.println("Server response: " + response);
         } catch (IOException e) {
             e.printStackTrace();
         }

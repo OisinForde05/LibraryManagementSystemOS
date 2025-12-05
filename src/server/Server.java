@@ -15,6 +15,9 @@ public class Server {
             BufferedReader input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             PrintWriter output = new PrintWriter(clientSocket.getOutputStream(), true);
 
+            String clientMessage = input.readLine();
+            System.out.println("Client says: " + clientMessage);
+            output.println("Message received: " + clientMessage);
 
             clientSocket.close();
         } catch (IOException e) {
