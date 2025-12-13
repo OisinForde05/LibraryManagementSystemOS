@@ -19,6 +19,14 @@ public class RecordDatabase {
         return new ArrayList<>(records);
     }
 
+    public static synchronized List<LibraryRecord> getRecordsByLibrarian(String librarianId) {
+        List<LibraryRecord> list = new ArrayList<>();
+        for (LibraryRecord r : records) {
+            if (r.getLibrarianId().equalsIgnoreCase(librarianId)) list.add(r);
+        }
+        return list;
+    }
+
     public static synchronized LibraryRecord getRecordById(int id) {
         for (LibraryRecord r : records) {
             if (r.getRecordId() == id) return r;
@@ -49,21 +57,7 @@ public class RecordDatabase {
 
     public static void saveToFile() {
         try (PrintWriter writer = new PrintWriter(new FileWriter(FILE_PATH))) {
-            for (LibraryRecord r : records) {
-                writer.println(r.toString());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void loadFromFile() {
-        File file = new File(FILE_PATH);
-        if (!file.exists()) return;
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-            }
+            for (LibraryRecord r : records) writer.println(r.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
