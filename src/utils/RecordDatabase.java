@@ -1,11 +1,13 @@
 package utils;
 
 import models.LibraryRecord;
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.io.*;
 
 public class RecordDatabase {
-    private static final List<LibraryRecord> records = Collections.synchronizedList(new ArrayList<>());
+    private static final List<LibraryRecord> records = new CopyOnWriteArrayList<>();
     private static final String FILE_PATH = "records.txt";
 
     public static synchronized LibraryRecord createRecord(String recordType, String studentId, String status) {
@@ -22,7 +24,9 @@ public class RecordDatabase {
     public static synchronized List<LibraryRecord> getRecordsByLibrarian(String librarianId) {
         List<LibraryRecord> list = new ArrayList<>();
         for (LibraryRecord r : records) {
-            if (r.getLibrarianId() != null && r.getLibrarianId().equalsIgnoreCase(librarianId)) list.add(r);
+            if (r.getLibrarianId() != null && r.getLibrarianId().equalsIgnoreCase(librarianId)) {
+                list.add(r);
+            }
         }
         return list;
     }
@@ -57,7 +61,9 @@ public class RecordDatabase {
 
     public static synchronized void saveToFile() {
         try (PrintWriter writer = new PrintWriter(new FileWriter(FILE_PATH))) {
-            for (LibraryRecord r : records) writer.println(r.toPersistString());
+            for (LibraryRecord r : records) {
+                writer.println(r.toPersistString());
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

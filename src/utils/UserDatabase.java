@@ -1,11 +1,12 @@
 package utils;
 
 import models.User;
-import java.util.*;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.io.*;
 
 public class UserDatabase {
-    private static final List<User> users = Collections.synchronizedList(new ArrayList<>());
+    private static final List<User> users = new CopyOnWriteArrayList<>();
     private static final String FILE_PATH = "users.txt";
 
     public static synchronized boolean register(User user) {
@@ -29,27 +30,30 @@ public class UserDatabase {
     }
 
     public static synchronized boolean updatePassword(User user, String newPassword) {
-        if (newPassword.length() < 4) return false;
+        if (newPassword == null || newPassword.length() < 4) return false;
         user.setPassword(newPassword);
         saveToFile();
         return true;
     }
 
     public static synchronized List<User> getAllUsers() {
-        return new ArrayList<>(users);
+        return List.copyOf(users);
     }
 
-    public static void saveToFile() {
+    public static synchronized void saveToFile() {
         try (PrintWriter writer = new PrintWriter(new FileWriter(FILE_PATH))) {
-            for (User u : users) writer.println(u.toString());
+            for (User u : users) {
+                writer.println(u.toString());
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public static void loadFromFile() {
+    public static synchronized void loadFromFile() {
         File file = new File(FILE_PATH);
         if (!file.exists()) return;
+        users.clear();
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {

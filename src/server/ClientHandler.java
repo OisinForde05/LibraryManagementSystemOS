@@ -1,9 +1,17 @@
 package server;
 
-import java.io.*;
-import java.net.*;
-import models.*;
-import utils.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.net.SocketException;
+
+import models.LibraryRecord;
+import models.User;
+import utils.LoggerUtil;
+import utils.RecordDatabase;
+import utils.UserDatabase;
 
 public class ClientHandler implements Runnable {
     private Socket clientSocket;
@@ -52,7 +60,9 @@ public class ClientHandler implements Runnable {
                             loggedInUser = user;
                             output.println("Login successful as " + user.getRole() + ": " + user.getName());
                             LoggerUtil.log("User logged in: " + user.getEmail());
-                        } else output.println("Invalid email or password");
+                        } else {
+                            output.println("Invalid email or password");
+                        }
                         break;
 
                     case "UPDATE_PASSWORD":
@@ -88,7 +98,9 @@ public class ClientHandler implements Runnable {
                             output.println("You must log in first.");
                             break;
                         }
-                        for (LibraryRecord r : RecordDatabase.getAllRecords()) output.println(r.toString());
+                        for (LibraryRecord r : RecordDatabase.getAllRecords()) {
+                            output.println(r.toString());
+                        }
                         output.println("END_OF_RECORDS");
                         break;
 
@@ -135,8 +147,9 @@ public class ClientHandler implements Runnable {
                             output.println("Only librarians can view assigned records.");
                             break;
                         }
-                        for (LibraryRecord r : RecordDatabase.getRecordsByLibrarian(loggedInUser.getStudentId()))
+                        for (LibraryRecord r : RecordDatabase.getRecordsByLibrarian(loggedInUser.getStudentId())) {
                             output.println(r.toString());
+                        }
                         output.println("END_OF_RECORDS");
                         break;
 
@@ -151,6 +164,8 @@ public class ClientHandler implements Runnable {
                         break;
                 }
             }
+        } catch (SocketException se) {
+            LoggerUtil.log("Client disconnected abruptly.");
         } catch (IOException e) {
             e.printStackTrace();
         }

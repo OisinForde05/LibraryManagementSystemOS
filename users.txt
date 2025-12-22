@@ -1,1 +1,5 @@
 John,1234,john@email.com,newpass,CS,Student
+REGISTER,john,123,john,john,j
+REGISTER,Sarah,L001,sarah@uni.com,libpass,Library
+Sarah,L001,sarah@uni.com,libpass,Library,Librarian
+John,S001,john@uni.com,pass123,CS,Student

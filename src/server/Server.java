@@ -9,9 +9,10 @@ public class Server {
     private static final int PORT = 5000;
 
     public static void main(String[] args) {
+        LoggerUtil.log("Loading databases...");
         UserDatabase.loadFromFile();
         RecordDatabase.loadFromFile();
-        LoggerUtil.log("Server started on port " + PORT);
+        LoggerUtil.log("Server starting on port " + PORT);
 
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             while (true) {
@@ -20,7 +21,11 @@ public class Server {
                 new Thread(new ClientHandler(clientSocket)).start();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LoggerUtil.log("Server stopped due to exception: " + e.getMessage());
+        } finally {
+            LoggerUtil.log("Server shutting down, saving data...");
+            UserDatabase.saveToFile();
+            RecordDatabase.saveToFile();
         }
     }
 }
