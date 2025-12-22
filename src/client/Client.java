@@ -12,17 +12,19 @@ public class Client {
     private static final int SERVER_PORT = 5000;
 
     public static void main(String[] args) {
+        // Create a socket connection to the server and set up input/output streams
         try (Socket socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
              BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
              PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
              Scanner scanner = new Scanner(System.in)) {
 
-            // First line from server
+            // Receive initial welcome message from the server
             String welcome = input.readLine();
             if (welcome != null) {
                 System.out.println(welcome);
             }
 
+            // Main menu loop
             while (true) {
                 System.out.println();
                 System.out.println("Menu:");
@@ -40,6 +42,7 @@ public class Client {
                 String choice = scanner.nextLine().trim();
                 String cmd;
 
+                // Build a server command based on menu selection
                 switch (choice) {
                     case "1":
                         System.out.println("Enter: name studentId email password department role");
@@ -93,6 +96,7 @@ public class Client {
                         break;
 
                     case "9":
+                        // Send exit command and close client gracefully
                         cmd = "EXIT";
                         output.println(cmd);
                         String resp = input.readLine();
@@ -107,10 +111,10 @@ public class Client {
                         continue;
                 }
 
-                // Send command to server
+                // Send constructed command to the server
                 output.println(cmd);
 
-                // Read response(s) from server
+                // Read server responses; loop ends on END_OF_RECORDS or single reply
                 while (true) {
                     String response = input.readLine();
                     if (response == null) {

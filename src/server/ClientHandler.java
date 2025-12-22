@@ -24,17 +24,22 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         try {
+            // Streams for reading client input and sending responses
             BufferedReader input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             PrintWriter output = new PrintWriter(clientSocket.getOutputStream(), true);
 
+            // Initial message sent to client when connection is established
             output.println("Connected. Commands: REGISTER, LOGIN, CREATE_RECORD, GET_RECORDS, ASSIGN_RECORD, UPDATE_STATUS, UPDATE_PASSWORD, VIEW_ASSIGNED, EXIT");
 
             String message;
+            // Main loop processes incoming commands from client
             while ((message = input.readLine()) != null) {
                 String[] parts = message.split(" ");
                 String command = parts[0].toUpperCase();
 
                 switch (command) {
+
+                    // Registering a new user
                     case "REGISTER":
                         if (parts.length < 7) {
                             output.println("Usage: REGISTER name studentId email password department role");
@@ -50,6 +55,7 @@ public class ClientHandler implements Runnable {
                         if (registered) LoggerUtil.log("New user registered: " + parts[3]);
                         break;
 
+                    // Login existing user
                     case "LOGIN":
                         if (parts.length < 3) {
                             output.println("Usage: LOGIN email password");
@@ -65,6 +71,7 @@ public class ClientHandler implements Runnable {
                         }
                         break;
 
+                    // Allow logged-in users to change password
                     case "UPDATE_PASSWORD":
                         if (loggedInUser == null) {
                             output.println("You must log in first.");
@@ -79,6 +86,7 @@ public class ClientHandler implements Runnable {
                         if (changed) LoggerUtil.log("Password updated for: " + loggedInUser.getEmail());
                         break;
 
+                    // Create a new library record (student request)
                     case "CREATE_RECORD":
                         if (loggedInUser == null) {
                             output.println("You must log in first.");
@@ -93,6 +101,7 @@ public class ClientHandler implements Runnable {
                         LoggerUtil.log("Record created by " + loggedInUser.getEmail());
                         break;
 
+                    // Retrieve all records
                     case "GET_RECORDS":
                         if (loggedInUser == null) {
                             output.println("You must log in first.");
@@ -104,6 +113,7 @@ public class ClientHandler implements Runnable {
                         output.println("END_OF_RECORDS");
                         break;
 
+                    // Librarian assigns a record to themselves or another librarian
                     case "ASSIGN_RECORD":
                         if (loggedInUser == null || !loggedInUser.getRole().equalsIgnoreCase("Librarian")) {
                             output.println("Only librarians can assign records.");
@@ -123,6 +133,7 @@ public class ClientHandler implements Runnable {
                         }
                         break;
 
+                    // Update record status (requested, borrowed, returned)
                     case "UPDATE_STATUS":
                         if (loggedInUser == null) {
                             output.println("You must log in first.");
@@ -142,6 +153,7 @@ public class ClientHandler implements Runnable {
                         }
                         break;
 
+                    // Librarians view only the records assigned to them
                     case "VIEW_ASSIGNED":
                         if (loggedInUser == null || !loggedInUser.getRole().equalsIgnoreCase("Librarian")) {
                             output.println("Only librarians can view assigned records.");
@@ -153,19 +165,24 @@ public class ClientHandler implements Runnable {
                         output.println("END_OF_RECORDS");
                         break;
 
+                    // Graceful disconnect
                     case "EXIT":
                         output.println("Goodbye");
                         LoggerUtil.log("Client disconnected: " + (loggedInUser != null ? loggedInUser.getEmail() : "unknown"));
                         clientSocket.close();
                         return;
 
+                    // Invalid or unknown commands
                     default:
                         output.println("Unknown command");
                         break;
                 }
             }
+
         } catch (SocketException se) {
+            // Handles abrupt client disconnects
             LoggerUtil.log("Client disconnected abruptly.");
+
         } catch (IOException e) {
             e.printStackTrace();
         }

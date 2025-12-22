@@ -3,7 +3,11 @@ package models;
 import java.time.LocalDate;
 
 public class LibraryRecord {
+
+    // Tracks next available record ID for new records
     private static int nextId = 1;
+
+    // Record fields stored in the system
     private int recordId;
     private String recordType;
     private LocalDate date;
@@ -11,6 +15,7 @@ public class LibraryRecord {
     private String status;
     private String librarianId;
 
+    // Constructor for creating a new record (fresh request)
     public LibraryRecord(String recordType, String studentId, String status) {
         this.recordId = nextId++;
         this.recordType = recordType;
@@ -20,7 +25,7 @@ public class LibraryRecord {
         this.librarianId = "";
     }
 
-    // constructor used when loading from persistence (keeps original id and date)
+    // Constructor used when loading from saved file (preserves ID and date)
     public LibraryRecord(int recordId, String recordType, LocalDate date, String studentId, String status, String librarianId) {
         this.recordId = recordId;
         this.recordType = recordType;
@@ -28,9 +33,12 @@ public class LibraryRecord {
         this.studentId = studentId;
         this.status = status;
         this.librarianId = (librarianId == null) ? "" : librarianId;
+
+        // Update nextId so IDs remain unique after loading
         if (recordId >= nextId) nextId = recordId + 1;
     }
 
+    // Basic getters
     public int getRecordId() {
         return recordId;
     }
@@ -55,6 +63,7 @@ public class LibraryRecord {
         return librarianId;
     }
 
+    // Update record status or assigned librarian
     public void setStatus(String status) {
         this.status = status;
     }
@@ -63,17 +72,19 @@ public class LibraryRecord {
         this.librarianId = librarianId;
     }
 
+    // Readable record output for displaying to clients
     @Override
     public String toString() {
         return "RecordID: " + recordId + ", Type: " + recordType + ", Date: " + date +
                 ", StudentID: " + studentId + ", Status: " + status + ", LibrarianID: " + librarianId;
     }
 
-    // persistence format: id|type|date|studentId|status|librarianId
+    // Converts record into a file-safe format
     public String toPersistString() {
         return recordId + "|" + escape(recordType) + "|" + date.toString() + "|" + escape(studentId) + "|" + escape(status) + "|" + escape(librarianId);
     }
 
+    // Reconstructs a LibraryRecord from a stored text line
     public static LibraryRecord fromPersistString(String line) {
         if (line == null || line.trim().isEmpty()) return null;
         String[] p = line.split("\\|", -1);
@@ -91,11 +102,13 @@ public class LibraryRecord {
         }
     }
 
+    // Escapes special characters so data can be safely stored
     private static String escape(String s) {
         if (s == null) return "";
         return s.replace("|", "\\|");
     }
 
+    // Restores original text from escaped data
     private static String unescape(String s) {
         if (s == null) return "";
         return s.replace("\\|", "|");
